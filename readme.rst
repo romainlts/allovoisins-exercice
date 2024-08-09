@@ -34,8 +34,6 @@ Privilégier la qualité du code et les bonnes pratiques
 Rendu
 ###################
 
-- Rendu du code : repo GIT ou un ZIP. Une démo hébergée est un plus. Intégrer les requêtes
-SQL.
-- Une documentation technique expliquant l’utilisation de l’API et éventuellement les
-différents choix de conception.
+- Rendu du code : repo GIT ou un ZIP. Une démo hébergée est un plus. Intégrer les requêtes SQL.
+- Une documentation technique expliquant l’utilisation de l’API et éventuellement les différents choix de conception.
 - Une estimation du temps passé sur les différents aspects.
