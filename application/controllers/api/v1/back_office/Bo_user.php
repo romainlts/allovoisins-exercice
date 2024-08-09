@@ -206,7 +206,6 @@ class Bo_user extends RestController
 			$user->setAddress($this->put('address'));
 		if ($this->put('professional_status'))
 			$user->setProfessionalStatus($this->put('professional_status'));
-		$user->setLastConnexion(date('Y-m-d H:i:s'));
 
 		// Update the user
 		$result = $this->user_model->update($user);
