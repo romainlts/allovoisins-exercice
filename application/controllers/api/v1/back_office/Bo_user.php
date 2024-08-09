@@ -114,13 +114,13 @@ class Bo_user extends RestController
 		// Get the list of users
 		$data['users'] = $this->user_model->list($sort, $order, $show, ($page - 1) * $show, [], $like);
 
-		// Return the result, if an error occurred, return the error message else return the list of users with the pagination data
-		if (isset($data['users']['code']) && isset($data['users']['message'])) {
+		// if an error occurred, return an error message and HTTP code 404
+		if ($data['users'] === false) {
 			$this->set_response("Users not found for these search criteria", RestController::HTTP_NOT_FOUND);
 			return;
 		}
 
-		// Return the list of users
+		// Return the list of users and HTTP code 200
 		$this->set_response($data, RestController::HTTP_OK);
 	}
 
@@ -168,10 +168,12 @@ class Bo_user extends RestController
 			return;
 		}
 
-		// Find the user to update, if the user is not found, return an error message
+		// Find the user to update
 		$user = $this->user_model->find_one_by_id($this->input->get('id'));
-		if (is_array($user)) {
-			$this->set_response("Error: " . $user['message'], RestController::HTTP_BAD_REQUEST);
+
+		// If the user is not found, return an error message with HTTP code 404
+		if ($user === null) {
+			$this->set_response("User not found", RestController::HTTP_NOT_FOUND);
 			return;
 		}
 
@@ -209,13 +211,13 @@ class Bo_user extends RestController
 		// Update the user
 		$result = $this->user_model->update($user);
 
-		// If the update failed, return an error message
-		if ($result !== true) {
+		// If the update failed, return an error message with HTTP code 500
+		if (!$result) {
 			$this->set_response("An internal error occurred, please contact administrator", RestController::HTTP_INTERNAL_ERROR);
 			return;
 		}
 
-		// Return a success response
+		// Return a success response with HTTP code 201
 		$this->set_response("User updated successfully", RestController::HTTP_CREATED);
 	}
 
@@ -255,23 +257,25 @@ class Bo_user extends RestController
 			return;
 		}
 
-		// Check if the user exists, if not return an error message
+		// Find the user to update
 		$user = $this->user_model->find_one_by_id($this->input->get('id'));
-		if (is_array($user)) {
-			$this->set_response("Error: " . $user['message'], RestController::HTTP_BAD_REQUEST);
+
+		// If the user is not found, return an error message with HTTP code 404
+		if ($user === null) {
+			$this->set_response("User not found", RestController::HTTP_NOT_FOUND);
 			return;
 		}
 
 		// Delete the user
 		$result = $this->user_model->delete(['id' => $this->input->get('id')]);
 
-		// If the update failed, return an error message
-		if ($result !== true) {
+		// If the update failed, return an error message with HTTP code 500
+		if (!$result) {
 			$this->set_response("An internal error occurred, please contact administrator", RestController::HTTP_INTERNAL_ERROR);
 			return;
 		}
 
-		// Return a success response
+		// Return a success response with HTTP code 201
 		$this->set_response("User deleted successfully", RestController::HTTP_CREATED);
 	}
 

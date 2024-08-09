@@ -101,13 +101,13 @@ class Fo_user extends RestController
 		// Insert the new user
 		$result = $this->user_model->insert($new_user);
 
-		// If the insertion failed, return an error message
-		if ($result !== true) {
+		// If the insertion failed, return an error message with HTTP code 500
+		if ($result === false) {
 			$this->set_response("An internal error occurred, please contact administrator", RestController::HTTP_INTERNAL_ERROR);
 			return;
 		}
 
-		// Return a success response
+		// Return a success response with HTTP code 201
 		$this->set_response("User added successfully", RestController::HTTP_CREATED);
 	}
 
@@ -158,9 +158,9 @@ class Fo_user extends RestController
 		// Find the user to update
 		$user = $this->user_model->find_one_by_id($this->input->get('id'));
 
-		// If the user is not found, return an error message
-		if (is_array($user)) {
-			$this->set_response("Error: " . $user['message'], RestController::HTTP_BAD_REQUEST);
+		// If the user is not found, return an error message with HTTP code 404
+		if ($user === null) {
+			$this->set_response("User not found", RestController::HTTP_NOT_FOUND);
 			return;
 		}
 
@@ -175,7 +175,7 @@ class Fo_user extends RestController
 		]);
 
 		// Check if the form_validation rules are respected, if not return the validation errors
-		if ($this->form_validation->run('user_update') == FALSE) {
+		if ($this->form_validation->run('user_update') === FALSE) {
 			$this->set_response(validation_errors(), RestController::HTTP_BAD_REQUEST);
 			return;
 		}
@@ -198,13 +198,13 @@ class Fo_user extends RestController
 		// Update the user
 		$result = $this->user_model->update($user);
 
-		// If the update failed, return an error message
-		if ($result !== true) {
+		// If the update failed, return an error message with HTTP code 500
+		if (!$result) {
 			$this->set_response("An internal error occurred, please contact administrator", RestController::HTTP_INTERNAL_ERROR);
 			return;
 		}
 
-		// Return a success response
+		// Return a success response with HTTP code 201
 		$this->set_response("User updated successfully", RestController::HTTP_CREATED);
 	}
 

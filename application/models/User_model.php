@@ -294,9 +294,9 @@ class User_model extends CI_Model
      * @param array $like - The like clause
      * 
      * @return array - Return an array of users
-     * @return array - Return the error [MySQL Error code, The error message]
+     * @return bool - Return false if query failed
      */
-    public function list(string $sort = 'id', string $order = 'ASC', int $limit = 10, int $offset = 20, array $where = [], array $like = []): array
+    public function list(string $sort = 'id', string $order = 'ASC', int $limit = 10, int $offset = 20, array $where = [], array $like = []): array|bool
     {
         // Check if the sort and order parameters are valid
         $sort = (in_array($sort, ['id', 'firstname', 'lastname', 'email', 'phone', 'address', 'professional_status', 'last_connexion'])) ? $sort : 'id';
@@ -317,8 +317,7 @@ class User_model extends CI_Model
 
         $query = $this->db->get('user', $limit, $offset);
 
-        // Return the list of users or an error
-        return ($query) ? $query->result() : $this->db->error();
+        return ($query) ? $query->result() : false;
     }
 
     // ------------------------------------------------------------------------
@@ -329,12 +328,11 @@ class User_model extends CI_Model
      * @param int $id - The id of the user to find
      * 
      * @return User_model - Return the user if found
-     * @return array - Return the error [MySQL Error code, The error message]
+     * @return null - Return null if the user is not found
      */
-    public function find_one_by_id(int $id): User_model|array
+    public function find_one_by_id(int $id): User_model|null
     {
-        $user = $this->db->get_where('user', ['id' => $id])->custom_row_object(0, 'User_model');
-        return ($user !== null) ? $user : ['message' => 'User not found'];
+        return $this->db->get_where('user', ['id' => $id])->custom_row_object(0, 'User_model');
     }
 
     // ------------------------------------------------------------------------
@@ -345,34 +343,38 @@ class User_model extends CI_Model
      * @param User_model $user - One User_model to insert
      * @param ArrayObject $user - An ArrayObject of User_model to insert
      * 
-     * @return bool - Return true if the user has been inserted
-     * @return array - Return the error [MySQL Error code, The error message]
+     * @return bool - Return true if the user has been inserted else return false
      */
-    public function insert(User_model|ArrayObject $data): bool|array
+    public function insert(User_model|ArrayObject $data): bool
     {
+        // Insert only one user
         if ($data instanceof User_model) {
-            // Insert one user
-            return ($this->db->Insert('user', $data)) ?: $this->db->error();
-        } else {
-            $error = false;
-            // Insert many users as a transaction block
-            $this->db->trans_start();
-            $this->db->trans_strict(FALSE);
+            return $this->db->Insert('user', $data);
+        }
 
-            foreach ($data as $user) {
-                if (!$this->db->insert('user', $user)) {
-                    $error = $this->db->error();
-                    break;
-                }
-            }
+        // Insert many users as a transaction block
+        $error = false;
+        $this->db->trans_start();
+        $this->db->trans_strict(FALSE);
 
-            if ($error !== false) {
-                $this->db->trans_rollback();
-                return $error;
-            } else {
-                return ($this->db->trans_complete()) ?: $this->db->error();
+        // Insert each user
+        foreach ($data as $user) {
+
+            // If an error occurred on the current user, break the loop
+            if (!$this->db->insert('user', $user)) {
+                $error = true;
+                break;
             }
         }
+
+        // If an error occurred, rollback the transaction
+        if ($error === true) {
+            $this->db->trans_rollback();
+            return false;
+        }
+
+        // Commit the transaction
+        return $this->db->trans_complete();
     }
 
     // ------------------------------------------------------------------------
@@ -382,12 +384,11 @@ class User_model extends CI_Model
      * 
      * @param User_model $user - The user to update
      * 
-     * @return bool - Return true if the user has been updated
-     * @return array - Return the error [MySQL Error code, The error message]
+     * @return bool - Return true if the user has been updated, else return false
      */
-    public function update(User_model $user): bool|array
+    public function update(User_model $user): bool
     {
-        return ($this->db->replace('user', $user)) ?: $this->db->error();
+        return $this->db->replace('user', $user);
     }
 
     // ------------------------------------------------------------------------
@@ -397,12 +398,11 @@ class User_model extends CI_Model
      *
      * @param array $where - The where clause
      * 
-     * @return bool - Return true if user(s) has been deleted
-     * @return array - Return the error [MySQL Error code, The error message]
+     * @return bool - Return true if user(s) has been deleted, else return false
      */
-    public function delete(array $where = []): bool|array
+    public function delete(array $where = []): bool
     {
-        return ($this->db->delete('user', $where)) ?: $this->db->error();
+        return $this->db->delete('user', $where);
     }
 
     // ------------------------------------------------------------------------
