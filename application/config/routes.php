@@ -52,3 +52,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'welcome';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+
+
+/*
+// | -------------------------------------------------------------------------
+// | API ROUTING
+// | -------------------------------------------------------------------------
+*/
+
+// FRONT OFFICE
+$route['api/v1/user/(:any)'] = 'api/v1/front_office/Fo_user/$1';
+
+// BACK OFFICE
+$route['api/v1/bo/user/(:any)'] = 'api/v1/back_office/Bo_user/$1';

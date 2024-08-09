@@ -12,7 +12,7 @@ use chriskacerguis\RestServer\RestController;
 
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class User extends RestController
+class Fo_user extends RestController
 {
 	/**
 	 * User model
@@ -41,7 +41,7 @@ class User extends RestController
 	public function __construct()
 	{
 		parent::__construct();
-
+		
 		// 500 requests per hour per user/key
 		$this->methods['list_get']['level'] = 0;
 		$this->methods['add_post']['level'] = 0;
@@ -52,83 +52,6 @@ class User extends RestController
 		$this->load->model('user_model');
 
 		$this->form_validation->set_error_delimiters('', '');
-	}
-
-	// ------------------------------------------------------------------------
-
-	/**
-	 * List users
-	 * 
-	 * This method handles GET requests to list users.
-	 * 
-	 * @return void
-	 * 
-	 * @example	GET /	api/v1/user/list
-	 * 
-	 * @apiParam GET parameters:
-	 * 		@apiParam {Int} page
-	 * 		@apiParam {Int} show
-	 * 		@apiParam {String} sort
-	 * 		@apiParam {String} order
-	 * 		
-	 * 		@apiParam {String} firstname
-	 * 		@apiParam {String} lastname
-	 * 
-	 * @apiSuccess {String} Success message. HTTP code 201.
-	 * @apiError {String} Error message. HTTP code 400.
-	 */
-	public function list_get()
-	{
-		// Determine page number
-		$page = ($this->input->get('page') !== null && (int) $this->input->get('page') !== 0) ? $this->input->get('page') : 1;
-
-		// Number of users to show per page
-		$show = ($this->input->get('show') !== null && (int) $this->input->get('show') !== 0) ? $this->input->get('show') : 10;
-
-		// Determine sorting column
-		$sort = ($this->input->get('sort') !== null) ? $this->input->get('sort') : 'id';
-
-		// Determine sorting order
-		$order = ($this->input->get('order') !== null) ? $this->input->get('order') : 'ASC';
-
-		// Prepare the where clause
-		$where = [];
-
-		// Prepare the like clause
-		$like = [];
-		if ($this->input->get('firstname') !== null) {
-			$like['firstname'] = (string)$this->input->get('firstname');
-		}
-		if ($this->input->get('lastname') !== null) {
-			$like['lastname'] = (string)$this->input->get('lastname');
-		}
-
-		// Get total number of users
-		$total = $this->user_model->count($where, $like);
-
-		// Get number of pages
-		$total_pages = ceil($total / $show);
-
-		// Check if the page number is valid
-		$page = ($page > $total_pages) ? $total_pages : $page;
-
-		// Prepare the data to return
-		$data = [
-			'current_page' => $page,
-			'total_pages' => $total_pages,
-			'total_users' => $total
-		];
-
-		// Get the list of users
-		$result = $this->user_model->list($sort, $order, $show, ($page - 1) * $show, [], $like);
-
-		// Return the result, if an error occurred, return the error message else return the list of users with the pagination data
-		if (isset($result['code']) && isset($result['message'])) {
-			$this->set_response("Error: " . $result['message'], RestController::HTTP_BAD_REQUEST);
-		} else {
-			$data['users'] = $result;
-			$this->set_response($data, RestController::HTTP_OK);
-		}
 	}
 
 	// ------------------------------------------------------------------------
@@ -282,57 +205,6 @@ class User extends RestController
 					}
 				}
 			}
-		}
-	}
-
-	// ------------------------------------------------------------------------
-
-	/**
-	 * Remove a specific user
-	 * 
-	 * This method handles DELETE requests to remove a specific user.
-	 * 
-	 * @return void
-	 * 
-	 * @example	DELETE /	api/v1/user/remove
-	 * 
-	 * @apiParam GET parameters:
-	 * 		@apiParam {Int} id
-	 * 
-	 * @apiSuccess {String} Success message. HTTP code 201.
-	 * @apiError {String} Error message. HTTP code 400.
-	 */
-	public function remove_delete()
-	{
-		if ($this->input->get('id') !== null) {
-			// Handle GET parameters and validate them through the form_validation library 
-			// and the id form_validation configuration available in application/config/form_validation.php
-			$this->form_validation->set_data([
-				'id' => $this->input->get('id')
-			]);
-
-			// Check if the form_validation rules are respected
-			if ($this->form_validation->run('id') == FALSE) {
-				// If not, return the validation errors
-				$this->set_response(validation_errors(), RestController::HTTP_BAD_REQUEST);
-			} else {
-				// Check if the user exists
-				$user = $this->user_model->find_one_by_id($this->input->get('id'));
-				if (is_array($user)) {
-					$this->set_response("Error: " . $user['message'], RestController::HTTP_BAD_REQUEST);
-				} else {
-					// If the validation is successful, delete the user
-					$result = $this->user_model->delete(['id' => $this->input->get('id')]);
-					// Return the result of the deletion
-					if ($result === true) {
-						$this->set_response("User deleted successfully", RestController::HTTP_CREATED);
-					} else {
-						$this->set_response("Error: " . $result['message'], RestController::HTTP_BAD_REQUEST);
-					}
-				}
-			}
-		} else {
-			$this->set_response("User ID is missing", RestController::HTTP_BAD_REQUEST);
 		}
 	}
 

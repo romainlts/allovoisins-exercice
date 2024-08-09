@@ -110,7 +110,7 @@ $config['rest_realm'] = 'REST API';
 |           authorization key
 |
 */
-$config['rest_auth'] = 'basic';
+$config['rest_auth'] = FALSE;
 
 /*
 |--------------------------------------------------------------------------
@@ -186,10 +186,7 @@ $config['auth_library_function'] = '';
 
 // ---Uncomment list line for the wildard unit test
 // $config['auth_override_class_method']['wildcard_test_cases']['*'] = 'basic';
-$config['auth_override_class_method']['user']['list'] = 'basic';
-$config['auth_override_class_method']['user']['registration'] = 'none';
-$config['auth_override_class_method']['user']['update'] = 'none';
-$config['auth_override_class_method']['user']['remove'] = 'basic';
+$config['auth_override_class_method']['Bo_user']['*'] = 'basic';
 /*
 |--------------------------------------------------------------------------
 | Override auth types for specific 'class/method/HTTP method'
