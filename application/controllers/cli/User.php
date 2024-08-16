@@ -56,19 +56,18 @@ class User extends CI_Controller
 		// Get the date 36 months ago
 		$date_outdated = new DateTime('now', new DateTimeZone('Europe/Paris'));
 		$date_outdated->modify('-36 months');
-
-		// Create the where clause
-		$where = ['last_connexion <' => $date_outdated->format('Y-m-d H:i:s')];
+		$date = $date_outdated->format('Y-m-d H:i:s');
 
 		// Count outdated users
-		$nb_outdated_users = $this->user_model->count($where);
+		$nb_outdated_users = $this->user_model->count_outdated($date);
 
+		// Display the number of outdated users
 		echo "$nb_outdated_users outdated users found. \n";
 
 		// Delete outdated users
 		if ($nb_outdated_users > 0) {
 			echo "Proceed to deletion... \n";
-			$this->user_model->delete($where);
+			$this->user_model->delete_outdated($date);
 			echo "Deletion completed. \n";
 		} else {
 			echo "No outdated users to delete. \n";

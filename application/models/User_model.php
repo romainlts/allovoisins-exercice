@@ -254,28 +254,19 @@ class User_model extends CI_Model
     // ------------------------------------------------------------------------
 
     /**
-     * Get total number of users
+     * Count the number of outdated users with no connexion since $date
      * 
-     * 
-     * @param array $where - The where clause
-     * @param array $like - The like clause
+     * @param string $date - The date
      *
-     * @return int
+     * @return int - Return the number of outdated users
      */
-    public function count(array $where = [], array $like = []): int
+    public function count_outdated(string $date): int
     {
         // Count the number of users
         $this->db->from('user');
 
-        // Add the where clause
-        if (!empty($where)) {
-            $this->db->where($where);
-        }
-
-        // Add the like clause
-        if (!empty($like)) {
-            $this->db->like($like);
-        }
+        // Where last connexion is older than $date
+        $this->db->where(['last_connexion <' => $date]);
 
         // Return the number of users
         return $this->db->count_all_results();
@@ -417,6 +408,20 @@ class User_model extends CI_Model
     public function delete_by_id(int $id): bool
     {
         return $this->db->delete('user', ['id' => $id]);
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Delete outdated users with no connexion since $date
+     *
+     * @param string $date - The date
+     * 
+     * @return bool - Return true if user has been deleted, else return false
+     */
+    public function delete_outdated(string $date): bool
+    {
+        return $this->db->delete('user', ['last_connexion <' => $date]);
     }
 
     // ------------------------------------------------------------------------
