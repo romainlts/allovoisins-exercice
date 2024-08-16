@@ -254,6 +254,28 @@ class User_model extends CI_Model
     // ------------------------------------------------------------------------
 
     /**
+     * Get total number of users with filters
+     * 
+     * @param string $firstname - The firstname of the user
+     * @param string $lastname - The lastname of the user
+     *
+     * @return int
+     */
+    public function count_with_filters(string $firstname, string $lastname): int
+    {
+        // Count the number of users
+        $this->db->from('user');
+
+        // Add the like clause
+        $this->db->like(['firstname' => $firstname, 'lastname' => $lastname]);
+
+        // Return the number of users
+        return $this->db->count_all_results();
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
      * Count the number of outdated users with no connexion since $date
      * 
      * @param string $date - The date
@@ -281,31 +303,21 @@ class User_model extends CI_Model
      * @param string $order - The order to sort by
      * @param int $limit - The number of users to show per page
      * @param int $offset - The offset to start from
-     * @param array $where - The where clause
-     * @param array $like - The like clause
+     * @param string $firstname - The firstname of the user
+     * @param string $lastname - The lastname of the user
      * 
      * @return array - Return an array of users
      * @return bool - Return false if query failed
      */
-    public function list(string $sort = 'id', string $order = 'ASC', int $limit = 10, int $offset = 20, array $where = [], array $like = []): array|bool
+    public function list(string $sort = 'id', string $order = 'ASC', int $limit = 10, int $offset = 20, string $firstname, string $lastname): array|bool
     {
-        // Check if the sort and order parameters are valid
-        $sort = (in_array($sort, ['id', 'firstname', 'lastname', 'email', 'phone', 'address', 'professional_status', 'last_connexion'])) ? $sort : 'id';
-        $order = (in_array($order, ['ASC', 'DESC'])) ? $order : 'ASC';
-
-        // Get the list of users
+        // Add the order by clause
         $this->db->order_by($sort, $order);
 
-        // Add the where clause
-        if (!empty($where)) {
-            $this->db->where($where);
-        }
-
         // Add the like clause
-        if (!empty($like)) {
-            $this->db->like($like);
-        }
+        $this->db->like(['firstname' => $firstname, 'lastname' => $lastname]);
 
+        // Get the list of users
         $query = $this->db->get('user', $limit, $offset);
 
         return ($query) ? $query->result() : false;

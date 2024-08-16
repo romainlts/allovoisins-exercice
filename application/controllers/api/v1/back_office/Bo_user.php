@@ -79,24 +79,8 @@ class Bo_user extends RestController
 		// Number of users to show per page
 		$show = ($this->input->get('show') !== null && (int) $this->input->get('show') !== 0) ? $this->input->get('show') : 10;
 
-		// Determine sorting column
-		$sort = ($this->input->get('sort') !== null) ? $this->input->get('sort') : 'id';
-
-		// Determine sorting order
-		$order = ($this->input->get('order') !== null) ? $this->input->get('order') : 'ASC';
-
-		// Prepare the where clause
-		$where = [];
-
-		// Prepare the like clause
-		$like = [];
-		if ($this->input->get('firstname') !== null)
-			$like['firstname'] = (string)$this->input->get('firstname');
-		if ($this->input->get('lastname') !== null)
-			$like['lastname'] = (string)$this->input->get('lastname');
-
 		// Get total number of users
-		$total = $this->user_model->count($where, $like);
+		$total = $this->user_model->count_with_filters((string) $this->input->get('firstname'), (string) $this->input->get('lastname'));
 
 		// Get number of pages
 		$total_pages = ceil($total / $show);
@@ -112,7 +96,7 @@ class Bo_user extends RestController
 		];
 
 		// Get the list of users
-		$data['users'] = $this->user_model->list($sort, $order, $show, ($page - 1) * $show, [], $like);
+		$data['users'] = $this->user_model->list((string) $this->input->get('sort'), (string) $this->input->get('order'), $show, ($page - 1) * $show, (string) $this->input->get('firstname'), (string) $this->input->get('lastname'));
 
 		// if an error occurred, return an error message and HTTP code 404
 		if ($data['users'] === false) {
