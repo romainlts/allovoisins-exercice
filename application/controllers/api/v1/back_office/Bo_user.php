@@ -266,7 +266,7 @@ class Bo_user extends RestController
 		}
 
 		// Delete the user
-		$result = $this->user_model->delete(['id' => $this->input->get('id')]);
+		$result = $this->user_model->delete_by_id($this->input->get('id'));
 
 		// If the update failed, return an error message with HTTP code 500
 		if (!$result) {

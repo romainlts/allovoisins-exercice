@@ -406,4 +406,18 @@ class User_model extends CI_Model
     }
 
     // ------------------------------------------------------------------------
+
+    /**
+     * Delete a user by id
+     *
+     * @param int $id - The id of the user to delete
+     * 
+     * @return bool - Return true if user has been deleted, else return false
+     */
+    public function delete_by_id(int $id): bool
+    {
+        return $this->db->delete('user', ['id' => $id]);
+    }
+
+    // ------------------------------------------------------------------------
 }
